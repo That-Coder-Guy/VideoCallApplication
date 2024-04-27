@@ -33,7 +33,7 @@ namespace VideoCallApplication
 
         private void OnStartClick(object sender, RoutedEventArgs e)
         {
-            _videoServer.StartListening();
+            _videoServer.Listen();
             _videoServer.OnMessageReceived += OnMessageReceived;
             _videoServer.OnClientDisconnect += OnClientDisconnect;
             uxAddressAndPort.Text = $"{Communication.GetIPv4Addresses()[0]}:{_videoServer.Port}";

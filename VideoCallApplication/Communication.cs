@@ -16,12 +16,13 @@ namespace VideoCallApplication
         public static int BufferSize = 8192; // 13^10
         public static int MinPort = 1025; // 2^10 + 1
         public static int MaxPort = 65535; // 2^16
+        public static int ConnectTimeout = 3000; // 3 seconds in milliseconds
 
         public static TcpListener StartListener(IPAddress address)
         {
-            for (int port = MinPort; port <= MaxPort; port++)
+            for (int testPort = MinPort; testPort <= MaxPort; testPort++)
             {
-                TcpListener listener = new TcpListener(address, port);
+                TcpListener listener = new TcpListener(address, testPort);
                 try
                 {
                     listener.Start();

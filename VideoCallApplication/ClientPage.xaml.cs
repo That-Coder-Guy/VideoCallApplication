@@ -26,7 +26,7 @@ namespace VideoCallApplication
     public partial class ClientPage : Page
     {
         public NavigationService Navigation { get; }
-        private TcpClient _client = new TcpClient();
+        private Client _client = new Client();
         public ClientPage(NavigationService navigation)
         {
             Navigation = navigation;
@@ -39,16 +39,15 @@ namespace VideoCallApplication
             Debug.Print($"{splitAddress[0]}:{splitAddress[1]}");
             try
             {
-                _client = new TcpClient();
-                _client.Connect(IPAddress.Parse(splitAddress[0]), int.Parse(splitAddress[1]));
-                using (NetworkStream stream = _client.GetStream())
-                {
-                    for (long i = 0; i < 2000; i++)
-                    {
-                        Communication.WriteToNetworkStream(stream, new MemoryStream(BitConverter.GetBytes(i)));
-                    }
-                }
-                _client.Close();
+                _client.AttemptConnection(IPAddress.Parse(splitAddress[0]), int.Parse(splitAddress[1]));
+                //using (NetworkStream stream = _client.GetStream())
+                //{
+                //    for (long i = 0; i < 2000; i++)
+                //    {
+                //        Communication.WriteToNetworkStream(stream, new MemoryStream(BitConverter.GetBytes(i)));
+                //    }
+                //}
+                //_client.Close();
             }
             catch (Exception exc)
             {

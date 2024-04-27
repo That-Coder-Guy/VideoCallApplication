@@ -15,7 +15,14 @@ namespace VideoCallApplication
     {
         public IPAddress Address { get; } = IPAddress.Any;
 
-        public int Port { get; private set; }
+        public int Port
+        {
+            get
+            {
+                IPEndPoint endPoint = (IPEndPoint)_listener.LocalEndpoint;
+                return endPoint.Port;
+            }
+        }
 
         public bool IsListening { get; private set; }
 
@@ -44,13 +51,13 @@ namespace VideoCallApplication
         public Server(int maxClients)
         {
             MaxClients = maxClients;
-            _listener = new TcpListener(Address, Port);
+            _listener = new TcpListener(Address, 0);
         }
 
         public void Listen()
         {
             //  Find an available port and start listening
-            _listener = Communication.StartListener(IPAddress.Any);
+            _listener = Communication.StartListener(Address);
             IsListening = true;
 
             // Start a thread to accept connections
