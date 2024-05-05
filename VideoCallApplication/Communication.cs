@@ -16,9 +16,15 @@ namespace VideoCallApplication
         public static int BufferSize = 8192; // 13^10
         public static int MinPort = 1025; // 2^10 + 1
         public static int MaxPort = 65535; // 2^16
-        public static int ConnectTimeout = 3000; // 3 seconds in milliseconds
+        public static int ConnectionCodeTimeout = 1000;
+        public enum ConnectionCode : byte
+        {
+            Accepted = 0,
+            Rejected = 1,
+            Unresponsive = 2
+        }
 
-        public static TcpListener StartListener(IPAddress address)
+        public static TcpListener StartListener(IPAddress address, out int port)
         {
             for (int testPort = MinPort; testPort <= MaxPort; testPort++)
             {
@@ -26,6 +32,7 @@ namespace VideoCallApplication
                 try
                 {
                     listener.Start();
+                    port = testPort;
                     return listener;
                 }
                 catch (SocketException)
@@ -102,9 +109,29 @@ namespace VideoCallApplication
             }
             catch (IOException)
             {
-                Debug.Print("Client abruptly disconnected.");
                 return new MemoryStream();
             }
+        }
+
+        public static void SendConnectionCode(NetworkStream stream, ConnectionCode code)
+        {
+            stream.WriteByte((byte)code);
+        }
+
+        public static ConnectionCode ReceiveConnectionCode(NetworkStream stream)
+        {
+            ConnectionCode code;
+            stream.ReadTimeout = ConnectionCodeTimeout;
+            try
+            {
+                code = (ConnectionCode)stream.ReadByte();
+            }
+            catch (SocketException)
+            {
+                code = ConnectionCode.Unresponsive;
+            }
+            stream.ReadTimeout = -1;
+            return code;
         }
     }
 }

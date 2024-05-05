@@ -8,157 +8,121 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Windows.Themes;
 using System.IO;
+using System.Windows.Media.Animation;
+using static VideoCallApplication.Communication;
+using VideoCallApplication;
 
 namespace VideoCallApplication
 {
     public class Server
     {
-        public IPAddress Address { get; } = IPAddress.Any;
+        public IPAddress Address => _listener.Address;
 
-        public int Port
-        {
-            get
-            {
-                IPEndPoint endPoint = (IPEndPoint)_listener.LocalEndpoint;
-                return endPoint.Port;
-            }
-        }
+        public int Port => _listener.Port;
 
-        public bool IsListening { get; private set; }
+        public List<Client> Clients = new List<Client>();
 
-        public List<TcpClient> Clients = new List<TcpClient>();
+        public bool IsListening {  get; private set; }
 
         public int MaxClients { get; }
 
         public bool HasMaxClients { get => Clients.Count == MaxClients; }
 
-        public int ClientCount { get => Clients.Count; }
-
-        public delegate void OnClientConnectCallback(TcpClient client);
-
-        public delegate void OnClientDisconnectCallback(EndPoint endpoint);
-
-        public delegate void OnMessageReceivedCallback(TcpClient client, MemoryStream message);
+        public delegate void OnClientConnectCallback(Client client);
 
         public event OnClientConnectCallback? OnClientConnect;
 
-        public event OnClientDisconnectCallback? OnClientDisconnect;
+        public event Client.OnDisconnectCallback? OnClientDisconnect;
 
-        public event OnMessageReceivedCallback? OnMessageReceived;
+        public event Client.OnMessageReceivedCallback? OnMessageReceived;
 
-        private TcpListener _listener;
+        private ClientListener _listener;
 
-        public Server(int maxClients)
+        private Thread _listeningThread;
+
+        public Server(int maxClients) : this(IPAddress.Any, maxClients) { }
+
+        public Server(IPAddress address, int maxClients)
         {
             MaxClients = maxClients;
-            _listener = new TcpListener(Address, 0);
+            _listener = new ClientListener(address);
+            _listeningThread = new Thread(ListenForConnections);
         }
 
         public void Listen()
         {
-            //  Find an available port and start listening
-            _listener = Communication.StartListener(Address);
+            _listener.Listen();
+            _listeningThread.Start();
             IsListening = true;
-
-            // Start a thread to accept connections
-            new Thread(ListenForClientConnections).Start();
+            Debug.Print("Server started listening.");
         }
 
         public void Deafen()
         {
             IsListening = false;
-            _listener.Stop();
+            _listeningThread.Join();
+            _listener.Deafen();
+            Debug.Print("Server stopped listening.");
         }
 
         public void Close()
         {
-            if (IsListening)
+            if (_listener.IsListening)
             {
-                Deafen();
+                throw new InvalidOperationException("Must stop listening for connection before losing the server.");
             }
 
-            foreach (TcpClient client in Clients)
+            while (Clients.Count > 0)
             {
+                Client client = Clients.First();
                 Clients.Remove(client);
-                client.Close();
+                client.Disconnect();
             }
         }
 
-        private void ListenForClientConnections()
+        private void RemoveClient(Client client)
+        {
+            Clients.Remove(client);
+        }
+
+        private void ListenForConnections()
         {
             while (IsListening)
             {
-                if (_listener.Pending() && !HasMaxClients)
+                if (_listener.Pending())
                 {
-                    // Accept the new client
-                    TcpClient client = _listener.AcceptTcpClient();
-                    Debug.Print($"Client connected: {client.Client.RemoteEndPoint}");
-
-                    // Add new client to client list
-                    Clients.Add(client);
-
-                    // Call the OnClientConnect event handlers
-                    if (OnClientConnect != null)
+                    if (!HasMaxClients)
                     {
-                        // Get all attached event handlers
-                        Delegate[] handlers = OnClientConnect.GetInvocationList();
+                        Client client = _listener.AcceptPending();
+                        client.OnDisconnect += RemoveClient + OnClientDisconnect;
+                        client.OnMessageReceived += OnMessageReceived;
+                        Clients.Add(client);
 
-                        // Invoke each event handler in it's own thread
-                        foreach (Delegate handler in handlers)
-                        {
-                            handler.DynamicInvoke(client);
-                        }
+                        TriggerClientConnectEvent(client);
+
+                        Debug.Print($"Client accepted: {client.RemoteEndPoint}");
                     }
-                    new Thread(() => WaitForMessages(client)).Start();
+                    else
+                    {
+                        IPEndPoint rejectedConnection = _listener.RejectPending();
+
+                        Debug.Print($"Client rejected: {rejectedConnection}");
+                    }
                 }
             }
         }
 
-        private void WaitForMessages(TcpClient client)
+        private void TriggerClientConnectEvent(Client client)
         {
-            EndPoint clientEndpoint = client.Client.RemoteEndPoint!;
-            using (NetworkStream networkStream = client.GetStream())
-            {
-                bool isConnected = true;
-                while (isConnected)
-                {
-                    using (MemoryStream memoryStream = Communication.ReadFromNetworkStream(networkStream))
-                    {
-                        if (memoryStream.Length > 0)
-                        {
-                            if (OnMessageReceived != null)
-                            {
-                                // Get all attached event handlers
-                                Delegate[] handlers = OnMessageReceived.GetInvocationList();
-
-                                // Invoke each event handler in it's own thread
-                                foreach (Delegate handler in handlers)
-                                {
-                                    handler.DynamicInvoke(client, memoryStream);
-                                    memoryStream.Seek(0, SeekOrigin.Begin);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            isConnected = false;
-                        }
-                    }
-                }
-            }
-
-            if (OnClientDisconnect != null)
+            if (OnClientConnect != null)
             {
                 // Get all attached event handlers
-                Delegate[] handlers = OnClientDisconnect.GetInvocationList();
-
-                // Remove the client from the client list
-                Clients.Remove(client);
+                Delegate[] handlers = OnClientConnect.GetInvocationList();
 
                 // Invoke each event handler in it's own thread
                 foreach (Delegate handler in handlers)
                 {
-                    handler.DynamicInvoke(clientEndpoint);
+                    handler.DynamicInvoke(client);
                 }
             }
         }

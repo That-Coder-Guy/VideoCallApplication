@@ -1,6 +1,7 @@
 ﻿using Emgu.CV.CvEnum;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -23,7 +24,7 @@ namespace VideoCallApplication
     /// <summary>
     /// Interaction logic for ClientPage.xaml
     /// </summary>
-    public partial class ClientPage : Page
+    public partial class ClientPage : ClosablePage
     {
         public NavigationService Navigation { get; }
         private Client _client = new Client();
@@ -37,21 +38,22 @@ namespace VideoCallApplication
         {
             string[] splitAddress = uxAddressAndPort.Text.Split(":");
             Debug.Print($"{splitAddress[0]}:{splitAddress[1]}");
-            try
+            _client.Connect(IPAddress.Parse(splitAddress[0]), int.Parse(splitAddress[1]));
+        }
+
+        private void OnClosing(object sender, CancelEventArgs e)
+        {
+            if (_client.IsConnected)
             {
-                _client.AttemptConnection(IPAddress.Parse(splitAddress[0]), int.Parse(splitAddress[1]));
-                //using (NetworkStream stream = _client.GetStream())
-                //{
-                //    for (long i = 0; i < 2000; i++)
-                //    {
-                //        Communication.WriteToNetworkStream(stream, new MemoryStream(BitConverter.GetBytes(i)));
-                //    }
-                //}
-                //_client.Close();
-            }
-            catch (Exception exc)
-            {
-                Debug.Print(exc.ToString());
+                MessageBoxResult result = MessageBox.Show("Are you sure you want to close client connection?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.No)
+                {
+                    e.Cancel = true;
+                }
+                else
+                {
+                    _client.Disconnect();
+                }
             }
         }
     }

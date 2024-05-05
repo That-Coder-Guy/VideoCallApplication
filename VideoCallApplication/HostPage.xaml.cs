@@ -2,6 +2,7 @@
 using Emgu.CV.CvEnum;
 using Emgu.CV.Reg;
 using Emgu.CV.Structure;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -19,7 +20,7 @@ namespace VideoCallApplication
     /// <summary>
     /// Interaction logic for HostPage.xaml
     /// </summary>
-    public partial class HostPage : Page
+    public partial class HostPage : ClosablePage
     {
         public NavigationService Navigation { get; }
         private Server _videoServer = new Server(1);
@@ -39,19 +40,36 @@ namespace VideoCallApplication
             uxAddressAndPort.Text = $"{Communication.GetIPv4Addresses()[0]}:{_videoServer.Port}";
         }
 
-        private void OnClientConnect(TcpClient client)
+        private void OnClientConnect(Client client)
         {
             Debug.Print("Client connected");
         }
 
-        private void OnMessageReceived(TcpClient client, MemoryStream stream)
+        private void OnMessageReceived(MemoryStream stream, Client client)
         {
-            Debug.Print($"{client.Client.RemoteEndPoint} : {BitConverter.ToInt64(stream.ToArray(), 0)}");
+            Debug.Print($"{client.RemoteEndPoint} : {BitConverter.ToInt64(stream.ToArray(), 0)}");
         }
 
-        private void OnClientDisconnect(EndPoint endpoint)
+        private void OnClientDisconnect(Client client)
         {
-            Debug.Print($"{endpoint} : Disconnected");
+            Debug.Print($"{client.RemoteEndPoint} : Disconnected");
+        }
+
+        private void OnClosing(object sender, CancelEventArgs e)
+        {
+            if (_videoServer.IsListening)
+            {
+                MessageBoxResult result = MessageBox.Show("Are you sure you want to close the server?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.No)
+                {
+                    e.Cancel = true;
+                }
+                else
+                {
+                    _videoServer.Deafen();
+                    _videoServer.Close();
+                }
+            }
         }
     }
 }
