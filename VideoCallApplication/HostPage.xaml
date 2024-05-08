@@ -15,7 +15,7 @@
         </Grid.RowDefinitions>
         <Border Background="Black"/>
 
-        <Image/>
+        <Image x:Name="uxFrame"/>
         <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center">
             <Button x:Name="uxStart" Content="Start" Height="30" Padding="50,1,50,1" Margin="0,0,25,0" Click="OnStartClick"/>
             <TextBox x:Name="uxAddressAndPort" TextWrapping="Wrap" Width="150" Height="30" Margin="25,0,0,0" VerticalContentAlignment="Center" IsReadOnly="True"/>

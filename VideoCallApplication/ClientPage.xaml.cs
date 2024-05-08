@@ -1,23 +1,13 @@
-﻿using Emgu.CV.CvEnum;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace VideoCallApplication
 {
@@ -28,6 +18,8 @@ namespace VideoCallApplication
     {
         public NavigationService Navigation { get; }
         private Client _client = new Client();
+        private Webcam _webcam = new Webcam();
+
         public ClientPage(NavigationService navigation)
         {
             Navigation = navigation;
@@ -39,6 +31,19 @@ namespace VideoCallApplication
             string[] splitAddress = uxAddressAndPort.Text.Split(":");
             Debug.Print($"{splitAddress[0]}:{splitAddress[1]}");
             _client.Connect(IPAddress.Parse(splitAddress[0]), int.Parse(splitAddress[1]));
+        }
+
+        private void OnNewFrame(Bitmap bitmap)
+        {
+            if (_client.IsConnected)
+            {
+                using (MemoryStream memory = new MemoryStream())
+                {
+                    bitmap.Save(memory, ImageFormat.Bmp);
+                    memory.Position = 0;
+                    _client.Send(memory);
+                }
+            }
         }
 
         private void OnClosing(object sender, CancelEventArgs e)
@@ -55,6 +60,22 @@ namespace VideoCallApplication
                     _client.Disconnect();
                 }
             }
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            _webcam.OnNewFrame += OnNewFrame;
+            _webcam.Start();
+
+            /*
+            uxFrame.Dispatcher.Invoke(() =>
+            {
+                Dispatcher currentDispatcher = Dispatcher.CurrentDispatcher;
+                Thread currentThread = currentDispatcher.Thread;
+                Debug.Print($"Invoked Thread ID: {currentThread.ManagedThreadId}");
+                uxFrame.Source = _webcam.GetFrame();
+            });
+            */
         }
     }
 }

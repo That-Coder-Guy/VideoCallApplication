@@ -1,18 +1,8 @@
-﻿using Emgu.CV;
-using Emgu.CV.CvEnum;
-using Emgu.CV.Reg;
-using Emgu.CV.Structure;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Net;
-using System.Net.Sockets;
-using System.Runtime.CompilerServices;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 
 namespace VideoCallApplication
@@ -47,7 +37,10 @@ namespace VideoCallApplication
 
         private void OnMessageReceived(MemoryStream stream, Client client)
         {
-            Debug.Print($"{client.RemoteEndPoint} : {BitConverter.ToInt64(stream.ToArray(), 0)}");
+            Dispatcher.Invoke(() =>
+            {
+                uxFrame.Source = Webcam.ToBitmapImage(new Bitmap(stream));
+            });
         }
 
         private void OnClientDisconnect(Client client)
