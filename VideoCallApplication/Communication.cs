@@ -1,21 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
+﻿/*
+ * Communication.cs
+ * Author: Henry Glenn
+ */
+
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace VideoCallApplication
 {
+    /// <summary>
+    /// A collection of methods to standardize sendiong and receiving data over TCP connections.
+    /// </summary>
     public static class Communication
     {
+        /// <summary>
+        /// A variable to store the length of a message header
+        /// </summary>
         public static int HeaderSize = 8; // Long length in bytes
+
+        /// <summary>
+        /// The minimum port usable for a TCP connection.
+        /// </summary>
         public static int MinPort = 1025; // 2^10 + 1
+
+        /// <summary>
+        /// The maximum port usable for a TCP connection
+        /// </summary>
         public static int MaxPort = 65535; // 2^16
+
+        /// <summary>
+        /// The buffer size for receiveing data.
+        /// </summary>
         public static int BufferSize = 16384; // 16KB of data
+
+        /// <summary>
+        /// The maximum amout of time to wait for a connection to respond.
+        /// </summary>
         public static int ConnectionCodeTimeout = 1000;
 
         /// <summary>
