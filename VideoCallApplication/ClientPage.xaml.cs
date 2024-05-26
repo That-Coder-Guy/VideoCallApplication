@@ -6,8 +6,6 @@ using System.IO;
 using System.Net;
 using System.Windows;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Threading;
 
 namespace VideoCallApplication
 {

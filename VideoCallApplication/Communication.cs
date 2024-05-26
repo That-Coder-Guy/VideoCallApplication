@@ -11,7 +11,7 @@ using System.Net.Sockets;
 namespace VideoCallApplication
 {
     /// <summary>
-    /// A collection of methods to standardize sendiong and receiving data over TCP connections.
+    /// A collection of methods to standardize sending and receiving data over TCP connections.
     /// </summary>
     public static class Communication
     {
@@ -31,12 +31,12 @@ namespace VideoCallApplication
         public static int MaxPort = 65535; // 2^16
 
         /// <summary>
-        /// The buffer size for receiveing data.
+        /// The buffer size for receiving data.
         /// </summary>
         public static int BufferSize = 16384; // 16KB of data
 
         /// <summary>
-        /// The maximum amout of time to wait for a connection to respond.
+        /// The maximum amount of time to wait for a connection to respond.
         /// </summary>
         public static int ConnectionCodeTimeout = 1000;
 
@@ -56,7 +56,7 @@ namespace VideoCallApplication
         /// <param name="address"> The address the start the listener on. </param>
         /// <param name="port"> The port that the listener was started on. </param>
         /// <returns> A TCP listener listening on the given address and port. </returns>
-        /// <exception cref="SocketException"> If no availible port was found. </exception>
+        /// <exception cref="SocketException"> If no available port was found. </exception>
         public static TcpListener StartListener(IPAddress address, out int port)
         {
             for (int testPort = MinPort; testPort <= MaxPort; testPort++)
@@ -73,7 +73,7 @@ namespace VideoCallApplication
                     listener.Stop();
                 }
             }
-            throw new SocketException(); // No availible port was found.
+            throw new SocketException(); // No available port was found.
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace VideoCallApplication
         }
 
         /// <summary>
-        /// Writes the prvided memory stream to the given network stream.
+        /// Writes the provided memory stream to the given network stream.
         /// </summary>
         /// <param name="stream"> The network stream to write to. </param>
         /// <param name="data"> The memory stream to write. </param>
