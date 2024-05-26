@@ -19,12 +19,10 @@ namespace VideoCallApplication
     /// <summary>
     /// Interaction logic for StartPage.xaml
     /// </summary>
-    public partial class StartPage : Page
+    public partial class StartPage : NavigationPage
     {
-        public NavigationService Navigation { get; }
-        public StartPage(NavigationService navigation)
+        public StartPage(NavigationService navigation) : base(navigation)
         {
-            Navigation = navigation;
             InitializeComponent();
         }
 

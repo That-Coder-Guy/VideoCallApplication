@@ -10,14 +10,12 @@ namespace VideoCallApplication
     /// <summary>
     /// Interaction logic for HostPage.xaml
     /// </summary>
-    public partial class HostPage : ClosablePage
+    public partial class HostPage : NavigationPage
     {
-        public NavigationService Navigation { get; }
         private Server _videoServer = new Server(1);
 
-        public HostPage(NavigationService navigation)
+        public HostPage(NavigationService navigation) : base(navigation)
         {
-            Navigation = navigation;
             _videoServer.OnClientConnect += OnClientConnect;
             InitializeComponent();
         }

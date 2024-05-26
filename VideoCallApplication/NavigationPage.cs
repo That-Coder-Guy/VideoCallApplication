@@ -6,15 +6,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Navigation;
 
 namespace VideoCallApplication
 {
-    public partial class ClosablePage : Page
+    public partial class NavigationPage : Page
     {
         public event CancelEventHandler? Closing;
+        public NavigationService Navigation { get; }
 
-        public ClosablePage()
+        public NavigationPage(NavigationService navigation)
         {
+            Navigation = navigation; 
             Loaded += OnLoaded;
         }
 

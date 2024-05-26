@@ -14,15 +14,13 @@ namespace VideoCallApplication
     /// <summary>
     /// Interaction logic for ClientPage.xaml
     /// </summary>
-    public partial class ClientPage : ClosablePage
+    public partial class ClientPage : NavigationPage
     {
-        public NavigationService Navigation { get; }
         private Client _client = new Client();
         private Webcam _webcam = new Webcam();
 
-        public ClientPage(NavigationService navigation)
+        public ClientPage(NavigationService navigation) : base(navigation)
         {
-            Navigation = navigation;
             InitializeComponent();
         }
 

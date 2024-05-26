@@ -13,10 +13,14 @@ namespace VideoCallApplication
     public static class Communication
     {
         public static int HeaderSize = 8; // Long length in bytes
-        public static int BufferSize = 8192; // 13^10
         public static int MinPort = 1025; // 2^10 + 1
         public static int MaxPort = 65535; // 2^16
+        public static int BufferSize = 16384; // 16KB of data
         public static int ConnectionCodeTimeout = 1000;
+
+        /// <summary>
+        /// Create an enumeration to hold server connection request response bytes
+        /// </summary>
         public enum ConnectionCode : byte
         {
             Accepted = 0,
@@ -24,6 +28,13 @@ namespace VideoCallApplication
             Unresponsive = 2
         }
 
+        /// <summary>
+        /// Starts a TCP listener on the first available port
+        /// </summary>
+        /// <param name="address"> The address the start the listener on. </param>
+        /// <param name="port"> The port that the listener was started on. </param>
+        /// <returns> A TCP listener listening on the given address and port. </returns>
+        /// <exception cref="SocketException"> If no availible port was found. </exception>
         public static TcpListener StartListener(IPAddress address, out int port)
         {
             for (int testPort = MinPort; testPort <= MaxPort; testPort++)
@@ -40,9 +51,13 @@ namespace VideoCallApplication
                     listener.Stop();
                 }
             }
-            throw new Exception("No available port found.");
+            throw new SocketException(); // No availible port was found.
         }
 
+        /// <summary>
+        /// Finds all IPv4 addresses associated with the local machine.
+        /// </summary>
+        /// <returns> An array of all IPV4 addresses. </returns>
         public static IPAddress[] GetIPv4Addresses()
         {
             IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
@@ -57,29 +72,44 @@ namespace VideoCallApplication
             return addresses.ToArray();
         }
 
-        public static void WriteToNetworkStream(NetworkStream stream, MemoryStream message)
+        /// <summary>
+        /// Writes the prvided memory stream to the given network stream.
+        /// </summary>
+        /// <param name="stream"> The network stream to write to. </param>
+        /// <param name="data"> The memory stream to write. </param>
+        public static void WriteToNetworkStream(NetworkStream stream, MemoryStream data)
         {
+            // Ensure data stream read position to the beginning.
+            data.Position = 0;
+
             try
             {
-                // Write length header
-                stream.Write(BitConverter.GetBytes(message.Length));
+                // Write data stream length to aid in decoding.
+                byte[] lengthBytes = BitConverter.GetBytes(data.Length);
+                stream.Write(lengthBytes, 0, lengthBytes.Length);
 
-                byte[] buffer = new byte[BufferSize];
-                long bytesRemaining = message.Length;
-                while (bytesRemaining > 0)
-                {
-                    int bufferSize = (int)Math.Min(BufferSize, bytesRemaining);
-                    message.CopyTo(stream, bufferSize);
-                    bytesRemaining -= bufferSize;
-                }
+                // Write provided data to the network stream.
+                data.CopyTo(stream);
+
+                // Ensures all buffered data is sent through the network stream.
+                stream.Flush();
             }
             catch (IOException)
             {
                 Debug.Print("Client abruptly disconnected.");
             }
-            message.Seek(0, SeekOrigin.Begin);
+            finally
+            {
+                // Reset data stream read position to the beginning.
+                data.Position = 0;
+            }
         }
 
+        /// <summary>
+        /// Reads a single data packet from a network stream.
+        /// </summary>
+        /// <param name="stream"> The network stream to read from. </param>
+        /// <returns> The received data memory stream. </returns>
         public static MemoryStream ReadFromNetworkStream(NetworkStream stream)
         {
             byte[] messageLengthBytes = new byte[HeaderSize];
@@ -95,16 +125,24 @@ namespace VideoCallApplication
                     long bytesRemaining = BitConverter.ToInt64(messageLengthBytes);
 
                     // Create an stream to contain received data
-                    MemoryStream messageBytes = new MemoryStream();
+                    MemoryStream data = new MemoryStream();
 
                     byte[] buffer = new byte[BufferSize];
+
+                    // Note: If a foreign connection is closed while in this loop it causes it to be infinite.
                     while (bytesRemaining > 0)
                     {
                         int bufferSize = (int)Math.Min(BufferSize, bytesRemaining);
-                        bytesRemaining -= stream.Read(buffer, 0, bufferSize);
-                        messageBytes.Write(buffer, 0, bufferSize);
+                        int bytesRead = stream.Read(buffer, 0, bufferSize);
+                        if (bytesRead != bufferSize)
+                        {
+                            Debug.Print("Received data was incomplete.");
+                            return new MemoryStream();
+                        }
+                        bytesRemaining -= bytesRead;
+                        data.Write(buffer, 0, bufferSize);
                     }
-                    return messageBytes;
+                    return data;
                 }
             }
             catch (IOException)
@@ -113,11 +151,21 @@ namespace VideoCallApplication
             }
         }
 
+        /// <summary>
+        /// Sends a single byte connection code to a client attempting to validate there connection.
+        /// </summary>
+        /// <param name="stream"> The network stream to send the connection code to. </param>
+        /// <param name="code"> The connection code to send. </param>
         public static void SendConnectionCode(NetworkStream stream, ConnectionCode code)
         {
             stream.WriteByte((byte)code);
         }
 
+        /// <summary>
+        /// Waits to receive a single byte connection code to validate a server-client connection.
+        /// </summary>
+        /// <param name="stream"> The network stream to listen from the connection code on. </param>
+        /// <returns> The connection code received from the server. </returns>
         public static ConnectionCode ReceiveConnectionCode(NetworkStream stream)
         {
             ConnectionCode code;
