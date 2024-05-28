@@ -22,5 +22,10 @@ namespace VideoCallApplication
         {
             Navigation.Navigate(new HostPage(Navigation));
         }
+
+        private void uxTest_Click(object sender, RoutedEventArgs e)
+        {
+            Navigation.Navigate(new ConnectionPage(Navigation, new Client()));
+        }
     }
 }
