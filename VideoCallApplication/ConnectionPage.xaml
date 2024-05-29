@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:VideoCallApplication"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="885"
+      d:DesignHeight="540" d:DesignWidth="900"
       Title="ConnectionPage">
 
 
@@ -14,18 +14,28 @@
             <RowDefinition/>
             <RowDefinition Height="70"/>
         </Grid.RowDefinitions>
-        <Grid MinWidth="50" MinHeight="50" Margin="15,15,15,15">
+        <Grid MinWidth="50" MinHeight="50" Margin="15,15,15,15" Background="Black">
             <Grid.OpacityMask>
-                <VisualBrush Visual="{Binding ElementName=Mask}"/>
+                <VisualBrush Visual="{Binding ElementName=uxFeedMask}"/>
             </Grid.OpacityMask>
-            <Border x:Name="Mask" CornerRadius="25,25,25,25" Background="Black"/>
-            <Image Source="/code.png"/>
+            <Border x:Name="uxFeedMask" CornerRadius="25,25,25,25" Background="Black"/>
+            <Image x:Name="uxFeed"/>
         </Grid>
+        <Border BorderThickness="1" Background="White" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,25,25,0" CornerRadius="13,13,13,13">
+            <Expander Header="Preview" MinWidth="75" Padding="1,1,1,1">
+                <Grid>
+                    <Grid.OpacityMask>
+                        <VisualBrush Visual="{Binding ElementName=uxPreviewMask}"/>
+                    </Grid.OpacityMask>
+                    <Border x:Name="uxPreviewMask" Width="175" Height="125" Background="Black" CornerRadius="11,11,11,11"/>
+                </Grid>
+            </Expander>
+        </Border>
         <Grid Grid.Row="1">
-            <Border Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" CornerRadius="25,25,25,25" Margin="15,0,15,15">
+            <Border Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" CornerRadius="25,25,25,25" Margin="15,0,15,15" Height="50">
                 <Grid Margin="25,0,25,0">
                     <Button Content="End Call" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="10,5,10,5"/>
-                    <ComboBox HorizontalAlignment="Right" VerticalAlignment="Center" Width="120" Margin="685,0,0,0"/>
+                    <ComboBox HorizontalAlignment="Right" VerticalAlignment="Center" Width="120" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
                 </Grid>
             </Border>
         </Grid>
