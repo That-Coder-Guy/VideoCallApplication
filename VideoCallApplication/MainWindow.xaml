@@ -4,8 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VideoCallApplication"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" Closed="OnClosed" MinWidth="600" MinHeight="400">
+        mc:Ignorable="d" Height="450" Width="800" Closed="OnClosed" MinWidth="600" MinHeight="500" Title="Hank's Meetup">
     <Grid>
         <Frame x:Name="uxNavigationFrame" Content="Frame" NavigationUIVisibility="Hidden"/>
     </Grid>

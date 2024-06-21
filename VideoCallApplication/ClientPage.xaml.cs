@@ -14,9 +14,6 @@ namespace VideoCallApplication
     /// </summary>
     public partial class ClientPage : NavigationPage
     {
-        private Client _client = new Client();
-        private Webcam _webcam = new Webcam();
-
         public ClientPage(NavigationService navigation) : base(navigation)
         {
             InitializeComponent();
@@ -26,42 +23,15 @@ namespace VideoCallApplication
         {
             string[] splitAddress = uxAddressAndPort.Text.Split(":");
             Debug.Print($"{splitAddress[0]}:{splitAddress[1]}");
-            _client.Connect(IPAddress.Parse(splitAddress[0]), int.Parse(splitAddress[1]));
-        }
+            Client client = new Client();
+            client.Connect(IPAddress.Parse(splitAddress[0]), int.Parse(splitAddress[1]));
 
-        private void OnNewFrame(Bitmap bitmap)
-        {
-            if (_client.IsConnected)
-            {
-                using (MemoryStream memory = new MemoryStream())
-                {
-                    bitmap.Save(memory, ImageFormat.Bmp);
-                    memory.Position = 0;
-                    _client.Send(memory);
-                }
-            }
-        }
-
-        private void OnClosing(object sender, CancelEventArgs e)
-        {
-            if (_client.IsConnected)
-            {
-                MessageBoxResult result = MessageBox.Show("Are you sure you want to close client connection?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (result == MessageBoxResult.No)
-                {
-                    e.Cancel = true;
-                }
-                else
-                {
-                    _client.Disconnect();
-                }
-            }
+            Navigation.Navigate(new ConnectionPage(Navigation, client));
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            _webcam.OnNewFrame += OnNewFrame;
-            _webcam.Start();
+            //_webcam.Start();
 
             /*
             uxFrame.Dispatcher.Invoke(() =>

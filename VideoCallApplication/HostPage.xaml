@@ -9,16 +9,10 @@
       Title="HostPage" Closing="OnClosing">
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="13*"/>
-            <RowDefinition Height="2*"/>
-        </Grid.RowDefinitions>
-        <Border Background="Black"/>
-
-        <Image x:Name="uxFrame"/>
-        <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center">
-            <Button x:Name="uxStart" Content="Start" Height="30" Padding="50,1,50,1" Margin="0,0,25,0" Click="OnStartClick"/>
-            <TextBox x:Name="uxAddressAndPort" TextWrapping="Wrap" Width="150" Height="30" Margin="25,0,0,0" VerticalContentAlignment="Center" IsReadOnly="True"/>
+        <StackPanel Grid.Row="1" HorizontalAlignment="Center" Width="200" VerticalAlignment="Center">
+            <Label Content="Host" Margin="0,0,0,10" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="{DynamicResource HeaderFontSize}" FontFamily="{DynamicResource PrimaryFont}"/>
+            <TextBox x:Name="uxAddressAndPort" TextWrapping="Wrap" Height="30" VerticalContentAlignment="Center" IsReadOnly="True" Margin="0,10,0,10" FontSize="{DynamicResource ButtonFontSize}" FontFamily="{DynamicResource PrimaryFont}"/>
+            <Button x:Name="uxStart" Content="Start" Height="30" Padding="50,1,50,1" Click="OnStartClick" Margin="0,10,0,0" FontFamily="{DynamicResource PrimaryFont}" FontSize="{DynamicResource ButtonFontSize}"/>
         </StackPanel>
 
     </Grid>

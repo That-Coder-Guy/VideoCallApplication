@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:VideoCallApplication"
       mc:Ignorable="d" 
       d:DesignHeight="540" d:DesignWidth="900"
-      Title="ConnectionPage">
+      Title="ConnectionPage" Loaded="OnLoaded">
 
 
     <Grid>
@@ -22,20 +22,21 @@
             <Image x:Name="uxFeed"/>
         </Grid>
         <Border BorderThickness="1" Background="White" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,25,25,0" CornerRadius="13,13,13,13">
-            <Expander Header="Preview" MinWidth="75" Padding="1,1,1,1">
+            <Expander x:Name="uxPreviewExpander" Header="Preview" MinWidth="75" Padding="1,1,1,1">
                 <Grid>
                     <Grid.OpacityMask>
                         <VisualBrush Visual="{Binding ElementName=uxPreviewMask}"/>
                     </Grid.OpacityMask>
                     <Border x:Name="uxPreviewMask" Width="175" Height="125" Background="Black" CornerRadius="11,11,11,11"/>
+                    <Image x:Name="uxPreview" Width="175" Height="125" Stretch="UniformToFill"/>
                 </Grid>
             </Expander>
         </Border>
         <Grid Grid.Row="1">
-            <Border Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" CornerRadius="25,25,25,25" Margin="15,0,15,15" Height="50">
+            <Border Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" CornerRadius="25,25,25,25" Margin="15,0,15,15" Height="50" BorderThickness="1,1,1,1" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}">
                 <Grid Margin="25,0,25,0">
-                    <Button Content="End Call" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="10,5,10,5"/>
-                    <ComboBox HorizontalAlignment="Right" VerticalAlignment="Center" Width="120" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
+                    <Button Content="End Call" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="10,5,10,5" Click="OnEndClick"/>
+                    <ComboBox x:Name="uxInputOptions" HorizontalAlignment="Right" VerticalAlignment="Center" Width="180" SelectionChanged="OnInputSelectionChanged" DropDownOpened="uxInputOptionsOpened"/>
                 </Grid>
             </Border>
         </Grid>

@@ -4,6 +4,7 @@
  */
 
 using System.Diagnostics;
+using System.Drawing.Printing;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -139,7 +140,8 @@ namespace VideoCallApplication
             {
                 if (stream.Read(messageLengthBytes, 0, HeaderSize) == 0)
                 {
-                    return new MemoryStream();
+                    Debug.Print("Connection was ended by peer machine");
+                    return new MemoryStream(); // Connection ended by peer machine
                 }
                 else
                 {
@@ -156,20 +158,17 @@ namespace VideoCallApplication
                     {
                         int bufferSize = (int)Math.Min(BufferSize, bytesRemaining);
                         int bytesRead = stream.Read(buffer, 0, bufferSize);
-                        if (bytesRead != bufferSize)
-                        {
-                            Debug.Print("Received data was incomplete.");
-                            return new MemoryStream();
-                        }
                         bytesRemaining -= bytesRead;
-                        data.Write(buffer, 0, bufferSize);
+                        data.Write(buffer, 0, bytesRead);
                     }
                     return data;
                 }
             }
-            catch (IOException)
+            catch (IOException exc)
             {
-                return new MemoryStream();
+                Debug.Print(exc.Message);
+                Debug.Print("Connection was ended by local machine");
+                return new MemoryStream(); // Connection was ended by local machine or forcably closed by peer
             }
         }
 

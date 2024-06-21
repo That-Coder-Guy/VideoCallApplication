@@ -1,18 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 using System.Net;
-using System.Threading.Tasks;
 using System.IO;
-using System.Diagnostics;
-using System.Threading;
 using static VideoCallApplication.Communication;
-using System.Diagnostics.Eventing.Reader;
-using Emgu.CV.Cuda;
-using System.Runtime.CompilerServices;
-
+using System.Drawing.Printing;
+using System.Diagnostics;
 namespace VideoCallApplication
 {
     public class Client
@@ -102,6 +93,7 @@ namespace VideoCallApplication
         {
             RequireConnection();
             _client.Close();
+            Debug.Print($"Is client disconnected: {_client.Connected}");
             messageListeningThread.Join();
         }
 
@@ -135,8 +127,11 @@ namespace VideoCallApplication
                 }
             }
 
-            // TODO: Is this needed?
-            TriggerDisconnectEvent();
+            // TODO: This if block works off a hunch. Make sure to double check logic.
+            if (_client.Connected) // Make sure the disconnection handler is not called when the connection is terminated locally.
+            {
+                TriggerDisconnectEvent();
+            }
             _client.Dispose();
         }
         

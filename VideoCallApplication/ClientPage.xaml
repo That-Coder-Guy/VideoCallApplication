@@ -6,18 +6,13 @@
       xmlns:local="clr-namespace:VideoCallApplication"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="ClientPage" Closing="OnClosing" Loaded="OnLoaded">
+      Title="ClientPage" Loaded="OnLoaded">
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="13*"/>
-            <RowDefinition Height="2*"/>
-        </Grid.RowDefinitions>
-        <Border Background="Black"/>
-        <Image x:Name="uxFrame"/>
-        <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center">
-            <Button x:Name="uxStart" Content="Start" Height="30" Padding="50,1,50,1" Margin="0,0,25,0" Click="OnStartClick"/>
-            <TextBox x:Name="uxAddressAndPort" TextWrapping="Wrap" Width="150" Height="30" VerticalContentAlignment="Center"/>
+        <StackPanel Orientation="Vertical" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="200">
+            <Label HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="Join" FontSize="{DynamicResource HeaderFontSize}" Margin="0,0,0,10" FontFamily="{DynamicResource PrimaryFont}"/>
+            <TextBox x:Name="uxAddressAndPort" TextWrapping="Wrap" Height="30" VerticalContentAlignment="Center" Margin="0,10,0,10" FontSize="{DynamicResource ButtonFontSize}" FontFamily="{DynamicResource PrimaryFont}"/>
+            <Button x:Name="uxStart" Height="30" Padding="50,0,50,0" Click="OnStartClick" Margin="0,10,0,0" FontSize="14" FontFamily="{DynamicResource PrimaryFont}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="Connect"/>
         </StackPanel>
     </Grid>
 </local:NavigationPage>

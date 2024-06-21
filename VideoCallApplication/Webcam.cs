@@ -1,37 +1,100 @@
-﻿using Emgu.CV;
-using System.Collections.Generic;
+﻿using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Timers;
-using System.Windows;
-using System.Windows.Controls;
+using System.Management;
 using System.Windows.Media.Imaging;
-using System.Windows.Threading;
+using AForge.Video;
+using AForge.Video.DirectShow;
+using Usb.Events;
+using static VideoCallApplication.Webcam;
 
 namespace VideoCallApplication
 {
     public class Webcam
     {
-        private VideoCapture _videoCapture = new VideoCapture();
-        private DispatcherTimer _frameTimer;
-        private int _framesPerSecond = 60;
+        public VideoCaptureDevice? SelectedVideoDevice;
 
-        public delegate void OnNewFrameHandler(Bitmap frame);
+        public FilterInfo? SelectedInput;
 
-        public event OnNewFrameHandler? OnNewFrame;
+        private KeyValuePair<FilterInfo, VideoCaptureDevice> _input = new();
 
-        public Webcam()
+        public List<FilterInfo> Inputs => FilterCollectionToList(new FilterInfoCollection(FilterCategory.VideoInputDevice));
+
+        public delegate void NewFrameHandler(Bitmap frame);
+
+        public event NewFrameHandler? OnNewFrame;
+
+        public delegate void SelectedInputEjectedHandler(VideoCaptureDevice? device);
+
+        public event SelectedInputEjectedHandler? OnSelectedInputEjected;
+
+        private static List<FilterInfo> FilterCollectionToList(FilterInfoCollection collection)
         {
-            _frameTimer = new DispatcherTimer();
-            _frameTimer.Interval = TimeSpan.FromMilliseconds(1000 / _framesPerSecond);
-            _frameTimer.Tick += TriggerNewFrameEvent;
+            List<FilterInfo> filters = new List<FilterInfo>();
+            foreach (FilterInfo filter in collection)
+            {
+                filters.Add(filter);
+            }
+            return filters;
         }
 
-        public Bitmap GetFrame()
+        public static bool TryRemoveFilter(FilterInfo target, List<FilterInfo> collection)
         {
-            return _videoCapture.QueryFrame().ToBitmap();
+            foreach (FilterInfo filter in collection)
+            {
+                if (filter.MonikerString == target.MonikerString)
+                {
+                    collection.Remove(filter);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void OnPlayingFinished(object sender, ReasonToFinishPlaying reason)
+        {
+            if (reason == ReasonToFinishPlaying.DeviceLost)
+            {
+                TriggerSelectedInputEjectedEvent();
+                SelectedInput = null;
+                SelectedVideoDevice = null;
+            }
+        }
+
+        public void Select(FilterInfo device)
+        {
+            SelectedInput = device;
+
+            if (SelectedVideoDevice != null)
+            {
+                SelectedVideoDevice.SignalToStop();
+                SelectedVideoDevice.WaitForStop();
+            }
+
+            SelectedVideoDevice = new VideoCaptureDevice(device.MonikerString);
+            SelectedVideoDevice.NewFrame += TriggerNewFrameEvent;
+            SelectedVideoDevice.VideoSourceError += OnVideoSourceError;
+            SelectedVideoDevice.PlayingFinished += OnPlayingFinished;
+            SelectedVideoDevice.Start();
+        }
+
+        public void Deselect()
+        {
+            SelectedInput = null;
+
+            if (SelectedVideoDevice != null)
+            {
+                SelectedVideoDevice.SignalToStop();
+                SelectedVideoDevice.WaitForStop();
+            }
+            SelectedVideoDevice = null;
+        }
+
+        private void OnVideoSourceError(object sender, VideoSourceErrorEventArgs e)
+        {
+            Console.WriteLine("Video source error: " + e.Description);
+            Deselect();
         }
 
         public static BitmapImage ToBitmapImage(Bitmap bitmap)
@@ -49,30 +112,36 @@ namespace VideoCallApplication
             }
         }
 
-        public void Start()
-        {
-            _frameTimer.Start();
-        }
-
-        public void Stop()
-        {
-            _frameTimer.Stop();
-        }
-
-        private void TriggerNewFrameEvent(object? sender, EventArgs e)
+        private void TriggerNewFrameEvent(object? sender, NewFrameEventArgs e)
         {
             if (OnNewFrame != null)
             {
                 // Get the current frame from the webcam
-                Bitmap frame = GetFrame();
+                using (Bitmap frame = (Bitmap)e.Frame.Clone())
+                {
+                    // Get all attached event handlers
+                    Delegate[] handlers = OnNewFrame.GetInvocationList();
 
+                    // Invoke each event handler on the UI thread
+                    foreach (NewFrameHandler handler in handlers)
+                    {
+                        handler.Invoke(frame);
+                    }
+                }
+            }
+        }
+
+        private void TriggerSelectedInputEjectedEvent()
+        {
+            if (OnSelectedInputEjected != null)
+            {
                 // Get all attached event handlers
-                Delegate[] handlers = OnNewFrame.GetInvocationList();
+                Delegate[] handlers = OnSelectedInputEjected.GetInvocationList();
 
                 // Invoke each event handler on the UI thread
-                foreach (OnNewFrameHandler handler in handlers)
+                foreach (SelectedInputEjectedHandler handler in handlers)
                 {
-                    handler.Invoke(frame);
+                    handler.Invoke(SelectedVideoDevice);
                 }
             }
         }
