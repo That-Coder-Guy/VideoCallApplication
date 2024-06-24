@@ -1,7 +1,9 @@
-﻿using System.ComponentModel;
-using System.Diagnostics;
-using System.Drawing;
-using System.IO;
+﻿/*
+ * HostPage.cs
+ * Author: Henry Glenn
+ */
+
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Navigation;
 
@@ -24,6 +26,7 @@ namespace VideoCallApplication
         {
             _videoServer.Listen();
             uxAddressAndPort.Text = $"{Communication.GetIPv4Addresses()[0]}:{_videoServer.Port}";
+            uxStart.IsEnabled = false;
         }
 
         private void OnClientConnect(Client client)
@@ -32,24 +35,46 @@ namespace VideoCallApplication
             {
                 Navigation.Navigate(new ConnectionPage(Navigation, client));
             });
-            _videoServer.Deafen();
-            _videoServer.Close();
         }
 
         private void OnClosing(object sender, CancelEventArgs e)
         {
             if (_videoServer.IsListening)
             {
-                MessageBoxResult result = MessageBox.Show("Are you sure you want to stop listening for connections?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (result == MessageBoxResult.No)
+                bool? result = QuestionPopupBox.Show(this, "Confirm", "Are you sure you want to stop listening for connections?");
+                if (result == true)
                 {
-                    e.Cancel = true;
+                    _videoServer.Deafen();
                 }
                 else
                 {
-                    _videoServer.Deafen();
-                    _videoServer.Close();
+                    e.Cancel = true;
                 }
+            }
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            if (_videoServer.IsListening)
+            {
+                _videoServer.Deafen();
+            }
+        }
+
+        private void OnBackClick(object sender, RoutedEventArgs e)
+        {
+            if (_videoServer.IsListening)
+            {
+                bool? result = QuestionPopupBox.Show(this, "Confirm", "Are you sure you want to stop listening for connections?");
+                if (result == true)
+                {
+                    _videoServer.Deafen();
+                    Navigation.Navigate(new StartPage(Navigation));
+                }
+            }
+            else
+            {
+                Navigation.Navigate(new StartPage(Navigation));
             }
         }
     }

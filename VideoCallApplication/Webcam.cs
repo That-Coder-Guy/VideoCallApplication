@@ -1,13 +1,15 @@
-﻿using System.Diagnostics;
+﻿/*
+ * Webcam.cs
+ * Author: Henry Glenn
+ */
+
+
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Management;
 using System.Windows.Media.Imaging;
 using AForge.Video;
 using AForge.Video.DirectShow;
-using Usb.Events;
-using static VideoCallApplication.Webcam;
 
 namespace VideoCallApplication
 {
@@ -73,6 +75,7 @@ namespace VideoCallApplication
             }
 
             SelectedVideoDevice = new VideoCaptureDevice(device.MonikerString);
+
             SelectedVideoDevice.NewFrame += TriggerNewFrameEvent;
             SelectedVideoDevice.VideoSourceError += OnVideoSourceError;
             SelectedVideoDevice.PlayingFinished += OnPlayingFinished;
@@ -112,21 +115,42 @@ namespace VideoCallApplication
             }
         }
 
+        private static Bitmap CompressBitmap(Bitmap bitmap)
+        {
+            // Calculate the scaling factor
+            double scale = Math.Min(300.0 / bitmap.Width, 300.0 / bitmap.Height);
+
+            // Calculate the new width and height
+            int newWidth = (int)(bitmap.Width * scale);
+            int newHeight = (int)(bitmap.Height * scale);
+
+            // Resize the bitmap
+            Bitmap resizedBitmap = new Bitmap(newWidth, newHeight);
+            using (Graphics g = Graphics.FromImage(resizedBitmap))
+            {
+                g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+
+                g.DrawImage(bitmap, 0, 0, newWidth, newHeight);
+            }
+            return resizedBitmap;
+        }
+
         private void TriggerNewFrameEvent(object? sender, NewFrameEventArgs e)
         {
             if (OnNewFrame != null)
             {
-                // Get the current frame from the webcam
-                using (Bitmap frame = (Bitmap)e.Frame.Clone())
-                {
-                    // Get all attached event handlers
-                    Delegate[] handlers = OnNewFrame.GetInvocationList();
+                // Get all attached event handlers
+                Delegate[] handlers = OnNewFrame.GetInvocationList();
 
-                    // Invoke each event handler on the UI thread
-                    foreach (NewFrameHandler handler in handlers)
-                    {
-                        handler.Invoke(frame);
-                    }
+                // Compress original frame
+                Bitmap frame = CompressBitmap((Bitmap)e.Frame.Clone());
+
+                // Invoke each event handler on the UI thread
+                foreach (NewFrameHandler handler in handlers)
+                {
+                    handler.Invoke((Bitmap)frame.Clone());
                 }
             }
         }

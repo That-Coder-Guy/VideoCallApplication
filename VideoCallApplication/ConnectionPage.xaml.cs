@@ -1,4 +1,9 @@
-﻿using System.ComponentModel;
+﻿/*
+ * ConnectionPage.cs
+ * Author: Henry Glenn
+ */
+
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Drawing;
@@ -7,9 +12,6 @@ using System.Windows;
 using System.Windows.Navigation;
 using System.Windows.Controls;
 using AForge.Video.DirectShow;
-using static System.Net.WebRequestMethods;
-using System;
-using System.Threading.Channels;
 
 namespace VideoCallApplication
 {
@@ -37,18 +39,6 @@ namespace VideoCallApplication
 
         private void OnNewFrame(Bitmap bitmap)
         {
-            Dispatcher.Invoke(() =>
-            {
-                if (uxPreviewExpander.IsExpanded)
-                {
-                    uxPreview.Source = Webcam.ToBitmapImage(bitmap);
-                }
-                else if (uxPreview.Source != null)
-                {
-                    uxPreview.Source = null;
-                }
-            });
-
             if (_client.IsConnected)
             {
                 using (MemoryStream memory = new MemoryStream())
@@ -58,11 +48,24 @@ namespace VideoCallApplication
                     _client.Send(memory);
                 }
             }
+
+            Dispatcher.BeginInvoke(() =>
+            {
+                if (uxPreviewExpander.IsExpanded)
+                {
+                    uxPreview.Source = Webcam.ToBitmapImage(bitmap);
+                }
+                else if (uxPreview.Source != null)
+                {
+                    uxPreview.Source = null;
+                }
+                bitmap.Dispose();
+            });
         }
 
         private void OnSelectedInputEjected(VideoCaptureDevice? device)
         {
-            Dispatcher.Invoke(() =>
+            Dispatcher.BeginInvoke(() =>
             {
                 uxInputOptions.SelectedItem = null;
             });
@@ -73,18 +76,21 @@ namespace VideoCallApplication
         {
             Debug.Print($"{client.RemoteEndPoint} : Disconnected");
             _webcam.Deselect();
-            MessageBox.Show("Call has been ended by peer.", "Notice", MessageBoxButton.OK, MessageBoxImage.Warning);
-            Dispatcher.Invoke(() =>
+            Dispatcher.BeginInvoke(() =>
             {
+                MessagePopupBox.Show(this, "Notice", "Call has been ended by peer.");
                 Navigation.Navigate(new StartPage(Navigation));
             });
         }
 
         private void OnMessageReceived(MemoryStream stream, Client client)
         {
-            Dispatcher.Invoke(() =>
+            Dispatcher.BeginInvoke(() =>
             {
-                uxFeed.Source = Webcam.ToBitmapImage(new Bitmap(stream));
+                using (Bitmap bitmap = new Bitmap(stream))
+                {
+                    uxFeed.Source = Webcam.ToBitmapImage(bitmap);
+                }
             });
         }
 
@@ -99,11 +105,8 @@ namespace VideoCallApplication
                 }
                 else
                 {
-                    new Thread(() =>
-                    {
-                        _webcam.Deselect();
-                        _client.Disconnect();
-                    }).Start();
+                    _webcam.Deselect();
+                    _client.Disconnect();
                 }
             }
         }
@@ -148,25 +151,14 @@ namespace VideoCallApplication
             AddInputOptions(filtersToAdd);
         }
 
-
-
         private void OnEndClick(object sender, RoutedEventArgs e)
         {
-            /*
-             * NOTE:
-             * The following code is inside a temp thread because for some reason running this code
-             * syncronously causes the app to freeze thus causing an error to occur. The code that freezes
-             * the app is the "_client.Disconnect();" line.
-             */
-            new Thread(() =>
+            _webcam.Deselect();
+            _client.Disconnect();
+            Dispatcher.BeginInvoke(() =>
             {
-                _webcam.Deselect();
-                _client.Disconnect();
-                Dispatcher.Invoke(() =>
-                {
-                    Navigation.Navigate(new StartPage(Navigation));
-                });
-            }).Start();
+                Navigation.Navigate(new StartPage(Navigation));
+            });
         }
     }
 }

@@ -47,6 +47,7 @@ namespace VideoCallApplication
             MaxClients = maxClients;
             _listener = new ClientListener(address);
             _listeningThread = new Thread(ListenForConnections);
+            _listeningThread.Name = "Connection Listener";
         }
 
         public void Listen()

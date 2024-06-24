@@ -4,7 +4,6 @@
  */
 
 using System.Diagnostics;
-using System.Drawing.Printing;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -39,7 +38,7 @@ namespace VideoCallApplication
         /// <summary>
         /// The maximum amount of time to wait for a connection to respond.
         /// </summary>
-        public static int ConnectionCodeTimeout = 1000;
+        public static int ConnectionTimeout = 1000;
 
         /// <summary>
         /// Create an enumeration to hold server connection request response bytes
@@ -190,7 +189,7 @@ namespace VideoCallApplication
         public static ConnectionCode ReceiveConnectionCode(NetworkStream stream)
         {
             ConnectionCode code;
-            stream.ReadTimeout = ConnectionCodeTimeout;
+            stream.ReadTimeout = ConnectionTimeout;
             try
             {
                 code = (ConnectionCode)stream.ReadByte();

@@ -1,9 +1,16 @@
-﻿using System.Net.Sockets;
+﻿/*
+ * Client.cs
+ * Author: Henry Glenn
+ */
+
+using System.Net.Sockets;
 using System.Net;
 using System.IO;
 using static VideoCallApplication.Communication;
-using System.Drawing.Printing;
 using System.Diagnostics;
+using System.Net.Http;
+using System.Threading;
+
 namespace VideoCallApplication
 {
     public class Client
@@ -28,37 +35,43 @@ namespace VideoCallApplication
 
         private readonly TcpClient _client;
 
-        private readonly Thread messageListeningThread;
+        private readonly Thread _messageListeningThread;
 
         public Client()
         {
             IsConnected = false;
             _client = new TcpClient();
-            messageListeningThread = new Thread(ListenForMessages);
+            _messageListeningThread = new Thread(ListenForMessages);
+            _messageListeningThread.Name = "Inbound Massage Listener";
         }
 
         public Client(TcpClient client)
         {
             IsConnected = client.Connected;
             _client = client;
-            messageListeningThread = new Thread(ListenForMessages);
+            _messageListeningThread = new Thread(ListenForMessages);
+            _messageListeningThread.Name = "Inbound Massage Listener";
             if (IsConnected)
             {
                 UpdateEndPoints();
-                messageListeningThread.Start();
+                _messageListeningThread.Start();
             }
         }
 
         public void Connect(IPEndPoint endPoint)
         {
             RequireDisconnection();
-            new Thread(() => ConnectToServer(endPoint)).Start();
+            Thread serverConnectThread = new Thread(() => ConnectToServer(endPoint));
+            serverConnectThread.Name = "Server Connection Request Thread";
+            serverConnectThread.Start();
         }
 
         public void Connect(IPAddress address, int port)
         {
             RequireDisconnection();
-            new Thread(() => ConnectToServer(new IPEndPoint(address, port))).Start();
+            Thread serverConnectThread = new Thread(() => ConnectToServer(new IPEndPoint(address, port)));
+            serverConnectThread.Name = "Server Connection Request Thread";
+            serverConnectThread.Start();
         }
 
         private void ConnectToServer(IPEndPoint endPoint)
@@ -66,8 +79,19 @@ namespace VideoCallApplication
             ConnectionCode response;
             try
             {
-                _client.Connect(endPoint);
-                response = ReceiveConnectionCode(_client.GetStream());
+                Task connectTask = _client.ConnectAsync(endPoint);
+                Task timeoutTask = Task.Delay(ConnectionTimeout);
+                Task[] tasks = {connectTask, timeoutTask};
+                int completedTaskIndex = Task.WaitAny(tasks);
+
+                if (completedTaskIndex == Array.IndexOf(tasks, connectTask))
+                {
+                    response = ReceiveConnectionCode(_client.GetStream());
+                }
+                else
+                {
+                    response = ConnectionCode.Unresponsive;
+                }
             }
             catch (SocketException)
             {
@@ -79,12 +103,16 @@ namespace VideoCallApplication
                 IsConnected = true;
                 UpdateEndPoints();
                 TriggerConnectResponseEvent(response);
-                messageListeningThread.Start();
+                _messageListeningThread.Start();
             }
             else if (response == ConnectionCode.Rejected)
             {
                 _client.Close();
                 _client.Dispose();
+                TriggerConnectResponseEvent(response);
+            }
+            else if (response == ConnectionCode.Unresponsive)
+            {
                 TriggerConnectResponseEvent(response);
             }
         }
@@ -93,8 +121,7 @@ namespace VideoCallApplication
         {
             RequireConnection();
             _client.Close();
-            Debug.Print($"Is client disconnected: {_client.Connected}");
-            messageListeningThread.Join();
+            _messageListeningThread.Join();
         }
 
         public void Send(MemoryStream message)
@@ -191,8 +218,11 @@ namespace VideoCallApplication
                 // Invoke each event handler in it's own thread
                 foreach (Delegate handler in handlers)
                 {
-                    handler.DynamicInvoke(stream, this);
-                    stream.Seek(0, SeekOrigin.Begin);
+                    stream.Position = 0;
+                    MemoryStream message = new MemoryStream();
+                    stream.CopyTo(message);
+                    message.Position = 0;
+                    handler.DynamicInvoke(message, this);
                 }
             }
         }

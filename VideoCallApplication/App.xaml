@@ -5,9 +5,10 @@
              StartupUri="MainWindow.xaml"
     xmlns:System="clr-namespace:System;assembly=System.Runtime">
     <Application.Resources>
-         
         <FontFamily x:Key="PrimaryFont">Bahnschrift SemiBold</FontFamily>
         <System:Double x:Key="ButtonFontSize">14</System:Double>
         <System:Double x:Key="HeaderFontSize">24</System:Double>
+        <FontFamily x:Key="TextBlockFont">Bahnschrift SemiLight</FontFamily>
+        <System:Double x:Key="TextBlockFontSize">12</System:Double>
     </Application.Resources>
 </Application>

@@ -17,4 +17,10 @@
     <PackageReference Include="Usb.Events" Version="11.1.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="QuestionPopupBox.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
 </Project>
