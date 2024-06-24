@@ -76,6 +76,14 @@ namespace VideoCallApplication
 
             SelectedVideoDevice = new VideoCaptureDevice(device.MonikerString);
 
+            // Set video resolution to lowest possible
+            VideoCapabilities? lowestResolution = SelectedVideoDevice.VideoCapabilities.OrderBy(cap => cap.FrameSize.Width * cap.FrameSize.Height).FirstOrDefault();
+            Debug.Print(SelectedVideoDevice.VideoCapabilities.Length.ToString());
+            if (lowestResolution != null)
+            {
+                SelectedVideoDevice.VideoResolution = lowestResolution;
+            }
+
             SelectedVideoDevice.NewFrame += TriggerNewFrameEvent;
             SelectedVideoDevice.VideoSourceError += OnVideoSourceError;
             SelectedVideoDevice.PlayingFinished += OnPlayingFinished;

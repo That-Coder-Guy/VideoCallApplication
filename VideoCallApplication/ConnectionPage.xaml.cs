@@ -98,15 +98,15 @@ namespace VideoCallApplication
         {
             if (_client.IsConnected)
             {
-                MessageBoxResult result = MessageBox.Show("Are you sure you want to end the call?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (result == MessageBoxResult.No)
-                {
-                    e.Cancel = true;
-                }
-                else
+                bool? result = MessagePopupBox.Show(this, "Confirm", "Are you sure you want to end the call?");
+                if (result == true)
                 {
                     _webcam.Deselect();
                     _client.Disconnect();
+                }
+                else
+                {
+                    e.Cancel = true;
                 }
             }
         }
