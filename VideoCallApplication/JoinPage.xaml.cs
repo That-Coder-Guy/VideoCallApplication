@@ -1,5 +1,5 @@
 ﻿/*
- * JoinPage.cs
+ * JoinPage.xaml.cs
  * Author: Henry Glenn
  */
 

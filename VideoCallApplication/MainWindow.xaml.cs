@@ -1,4 +1,9 @@
-﻿using System.Windows;
+﻿/*
+ * MainWindow.xaml.cs
+ * Author: Henry Glenn
+ */
+
+using System.Windows;
 
 namespace VideoCallApplication
 {

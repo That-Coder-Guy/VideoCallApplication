@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿/*
+ * Server.cs
+ * Author: Henry Glenn
+ */
+
 using System.Diagnostics;
-using System.Linq;
-using System.Net.Sockets;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Windows.Themes;
-using System.IO;
-using System.Windows.Media.Animation;
-using static VideoCallApplication.Communication;
-using VideoCallApplication;
 
 namespace VideoCallApplication
 {

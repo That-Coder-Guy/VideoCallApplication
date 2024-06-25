@@ -1,4 +1,9 @@
-﻿using System.ComponentModel;
+﻿/*
+ * NavigationPage.cs
+ * Author: Henry Glenn
+ */
+
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;

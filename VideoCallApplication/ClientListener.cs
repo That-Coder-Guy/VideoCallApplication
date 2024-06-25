@@ -1,4 +1,9 @@
-﻿using System.Net;
+﻿/*
+ * ClientListener.cs
+ * Author: Henry Glenn
+ */
+
+using System.Net;
 using System.Net.Sockets;
 using static VideoCallApplication.Communication;
 

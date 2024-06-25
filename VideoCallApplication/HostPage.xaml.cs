@@ -1,5 +1,5 @@
 ﻿/*
- * HostPage.cs
+ * HostPage.xaml.cs
  * Author: Henry Glenn
  */
 

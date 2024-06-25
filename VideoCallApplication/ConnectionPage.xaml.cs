@@ -1,5 +1,5 @@
 ﻿/*
- * ConnectionPage.cs
+ * ConnectionPage.xaml.cs
  * Author: Henry Glenn
  */
 

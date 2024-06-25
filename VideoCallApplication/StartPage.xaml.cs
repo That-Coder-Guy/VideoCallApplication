@@ -1,4 +1,9 @@
-﻿using System.Windows;
+﻿/*
+ * StartPage.xaml.cs
+ * Author: Henry Glenn
+ */
+
+using System.Windows;
 using System.Windows.Navigation;
 
 namespace VideoCallApplication

@@ -7,9 +7,6 @@ using System.Net.Sockets;
 using System.Net;
 using System.IO;
 using static VideoCallApplication.Communication;
-using System.Diagnostics;
-using System.Net.Http;
-using System.Threading;
 
 namespace VideoCallApplication
 {

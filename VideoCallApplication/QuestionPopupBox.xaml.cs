@@ -1,4 +1,8 @@
-﻿using System.Diagnostics;
+﻿/*
+ * QuestionPopupBox.xaml.cs
+ * Author: Henry Glenn
+ */
+
 using System.Windows;
 using System.Windows.Media.Effects;
 
@@ -27,7 +31,7 @@ namespace VideoCallApplication
             uxTitle.Content = title;
             uxMessage.Text = message;
             BlurEffect blur = new BlurEffect();
-            blur.Radius = 3;
+            blur.Radius = 5;
 
             Owner.Effect = blur;
             bool? result = ShowDialog();
