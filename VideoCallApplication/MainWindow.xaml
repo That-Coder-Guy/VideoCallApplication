@@ -4,8 +4,38 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VideoCallApplication"
-        mc:Ignorable="d" Height="450" Width="800" Closed="OnClosed" MinWidth="600" MinHeight="500" Title="Hank's Meetup">
+        mc:Ignorable="d" Height="450" Width="800" Closed="OnClosed" MinWidth="600" MinHeight="500" Title="Video Call Service">
     <Grid>
-        <Frame x:Name="uxNavigationFrame" Content="Frame" NavigationUIVisibility="Hidden"/>
+        <Grid.Background>
+            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                <LinearGradientBrush.RelativeTransform>
+                    <TransformGroup>
+                        <ScaleTransform CenterY="0.5" CenterX="0.5"/>
+                        <SkewTransform CenterX="0.5" CenterY="0.5"/>
+                        <RotateTransform Angle="-13" CenterX="0.5" CenterY="0.5"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </LinearGradientBrush.RelativeTransform>
+                <GradientStop Color="Black"/>
+                <GradientStop Color="#FF00565C" Offset="1"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+        <Frame x:Name="uxNavigationFrame" Content="Frame" NavigationUIVisibility="Hidden">
+            <Frame.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <LinearGradientBrush.RelativeTransform>
+                        <TransformGroup>
+                            <ScaleTransform CenterY="0.5" CenterX="0.5"/>
+                            <SkewTransform CenterX="0.5" CenterY="0.5"/>
+                            <RotateTransform Angle="-40" CenterX="0.5" CenterY="0.5"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </LinearGradientBrush.RelativeTransform>
+                    <GradientStop Color="#FF13093C"/>
+                    <GradientStop Color="#FF251083" Offset="0.5"/>
+                    <GradientStop Color="#FF4A2AD8" Offset="1"/>
+                </LinearGradientBrush>
+            </Frame.Background>
+        </Frame>
     </Grid>
 </Window>

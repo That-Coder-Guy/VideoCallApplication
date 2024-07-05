@@ -34,9 +34,9 @@
         </Border>
         <Grid Grid.Row="1">
             <Border Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" CornerRadius="25,25,25,25" Margin="15,0,15,15" Height="50" BorderThickness="1,1,1,1" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}">
-                <Grid Margin="25,0,25,0">
-                    <Button Content="End Call" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="10,5,10,5" Click="OnEndClick"/>
-                    <ComboBox x:Name="uxInputOptions" HorizontalAlignment="Right" VerticalAlignment="Center" Width="180" SelectionChanged="OnInputSelectionChanged" DropDownOpened="uxInputOptionsOpened"/>
+                <Grid>
+                    <Button Content="End Call" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="10,6,10,4" Click="OnEndClick" Style="{DynamicResource RoundedButton}" FontFamily="{DynamicResource PrimaryFont}" FontSize="{DynamicResource ButtonFontSize}" Margin="15,0,0,0"/>
+                    <ComboBox x:Name="uxInputOptions" HorizontalAlignment="Right" VerticalAlignment="Center" Width="180" SelectionChanged="OnInputSelectionChanged" DropDownOpened="uxInputOptionsOpened" Margin="0,0,15,0"/>
                 </Grid>
             </Border>
         </Grid>

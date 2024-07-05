@@ -18,7 +18,7 @@
                 </Border>
                 <TextBlock FontSize="{DynamicResource TextBlockFontSize}" x:Name="uxMessage" TextWrapping="Wrap" Text="[Placeholder]" Margin="20,20,18,20" MinWidth="160" FontFamily="{DynamicResource TextBlockFont}" Grid.Row="1"/>
                 <Border Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Grid.Row="2" CornerRadius="0,0,9,9">
-                    <Button x:Name="uxOK" Content="OK" VerticalAlignment="Center" Height="26" Width="60" Click="OnOkClick" FontSize="{DynamicResource ButtonFontSize}" FontFamily="{DynamicResource PrimaryFont}" HorizontalAlignment="Right" HorizontalContentAlignment="Center" Padding="1,2,1,0" Margin="0,0,7,0"/>
+                    <Button x:Name="uxOK" Content="OK" VerticalAlignment="Center" Height="26" Width="60" Click="OnOkClick" FontSize="{DynamicResource ButtonFontSize}" FontFamily="{DynamicResource PrimaryFont}" HorizontalAlignment="Right" HorizontalContentAlignment="Center" Padding="1,2,1,0" Margin="0,0,7,0" Style="{DynamicResource SmallRoundedButton}"/>
                 </Border>
             </Grid>
         </Border>

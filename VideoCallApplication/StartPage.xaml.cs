@@ -23,7 +23,7 @@ namespace VideoCallApplication
             Navigation.Navigate(new ClientPage(Navigation));
         }
 
-        private void OnHostButtonClick(object sender, RoutedEventArgs e)
+        private void OnHostClick(object sender, RoutedEventArgs e)
         {
             Navigation.Navigate(new HostPage(Navigation));
         }
